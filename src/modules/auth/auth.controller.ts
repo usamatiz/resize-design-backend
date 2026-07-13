@@ -1,5 +1,15 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/services/users.service';
 import { AuthService, LoginResult } from './auth.service';
@@ -7,6 +17,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { BootstrapAdminDto } from './dto/bootstrap-admin.dto';
 import { LoginDto } from './dto/login.dto';
+import { SetPasswordDto } from './dto/set-password.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -31,6 +42,24 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign in with email + password' })
   login(@Body() dto: LoginDto): Promise<LoginResult> {
     return this.auth.login(dto.email, dto.password);
+  }
+
+  @Public()
+  @Get('invite/accept')
+  @ApiOperation({ summary: 'Verify invite token and redirect to set-password' })
+  acceptInvite(
+    @Query('token_hash') tokenHash: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    return this.auth.acceptInvite(tokenHash, res);
+  }
+
+  @Public()
+  @Post('set-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Set password after accepting an invite' })
+  setPassword(@Body() dto: SetPasswordDto): Promise<{ message: string }> {
+    return this.auth.setPassword(dto);
   }
 
   @Get('me')

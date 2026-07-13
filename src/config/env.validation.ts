@@ -17,7 +17,9 @@ class EnvVars {
   PORT?: string;
 
   @IsString() APP_URL: string;
+  @IsString() API_URL: string;
   @IsString() @IsOptional() INVITE_REDIRECT_PATH?: string;
+  @IsString() INVITE_SETUP_SECRET: string;
 
   @IsString() DATABASE_URL: string;
   @IsBooleanString() @IsOptional() DB_SSL?: string;
