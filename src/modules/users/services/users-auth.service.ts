@@ -44,19 +44,23 @@ export class UsersAuthService {
       },
     });
 
-    if (error || !data.user || !data.properties?.action_link) {
+    const tokenHash = data.properties?.hashed_token;
+    if (error || !data.user || !tokenHash) {
       this.logger.error(
         `Supabase generateLink(invite) failed for ${email}: ${error?.message}`,
       );
       throw new Error(error?.message ?? 'Failed to prepare invitation');
     }
 
+    const apiUrl = this.config.getOrThrow<string>('app.apiUrl');
+    const acceptUrl = `${apiUrl}/auth/invite/accept?token_hash=${encodeURIComponent(tokenHash)}`;
+
     try {
       await this.mail.sendInvitation({
         to: email,
         fullName,
         role,
-        inviteLink: data.properties.action_link,
+        inviteLink: acceptUrl,
         siteUrl: appUrl,
       });
     } catch (err) {
@@ -89,6 +93,20 @@ export class UsersAuthService {
         `Supabase createUser failed for ${email}: ${error?.message}`,
       );
       throw new Error(error?.message ?? 'Failed to create auth user');
+    }
+    return { authId: data.user.id };
+  }
+
+  async verifyInviteToken(tokenHash: string): Promise<{ authId: string }> {
+    const { data, error } = await this.supabase.anon.auth.verifyOtp({
+      type: 'invite',
+      token_hash: tokenHash,
+    });
+    if (error || !data.user) {
+      this.logger.error(
+        `Supabase verifyOtp(invite) failed: ${error?.message ?? 'no user'}`,
+      );
+      throw new Error(error?.message ?? 'Invalid or expired invite link');
     }
     return { authId: data.user.id };
   }

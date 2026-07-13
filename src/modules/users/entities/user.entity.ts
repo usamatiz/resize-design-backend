@@ -28,7 +28,7 @@ export class User {
   })
   role: UserRole;
 
-  /** Supabase auth user id (from auth.users.id). Null until the invitee accepts. */
+  /** Supabase auth user id (from auth.users.id). Set when the auth user is created. */
   @Index({ unique: true, where: 'supabase_auth_id IS NOT NULL' })
   @Column({ name: 'supabase_auth_id', type: 'uuid', nullable: true })
   supabaseAuthId: string | null;
