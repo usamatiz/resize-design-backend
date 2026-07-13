@@ -4,7 +4,7 @@ NestJS 11 + TypeORM 1 + Postgres (Supabase-hosted) + Supabase Auth/Storage.
 
 ## Skills
 
-Project-scoped Claude Code skills live in `.claude/skills/`. Invoke the one that fits the task:
+Project-scoped skills live in `.claude/skills/` (Claude Code) and `.cursor/skills/` (Cursor). Invoke the one that fits the task:
 
 - **nest-typeorm** — entities, repositories, queries
 - **nest-supabase** — Auth, Storage, Realtime clients

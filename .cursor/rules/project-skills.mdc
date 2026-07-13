@@ -1,0 +1,27 @@
+---
+description: Project Agent Skills for NestJS backend conventions. Read the matching skill from .cursor/skills/ when the task fits.
+alwaysApply: true
+---
+
+# Project skills (Cursor)
+
+This repo mirrors Claude Code skills under `.cursor/skills/`. **Read the relevant `SKILL.md` before implementing** when the task matches a skill's description.
+
+## NestJS backend
+
+| Skill | Use when |
+|-------|----------|
+| `nest-typeorm` | Entities, repositories, DB queries, persisted fields |
+| `nest-supabase` | Supabase Auth, Storage, Realtime — not raw Postgres |
+| `nest-migrations` | Schema changes, indexes, data backfills, migration troubleshooting |
+| `nest-controllers` | HTTP endpoints, DTOs, pipes, guards, route params |
+| `nest-services` | Business logic, workflows, transactions, orchestration |
+| `nest-service-separation` | Splitting a feature's services (repo vs auth vs storage vs external APIs) |
+
+Skills live at `.cursor/skills/<name>/SKILL.md`. Project overview and commands are in `CLAUDE.md` at the repo root.
+
+## Architecture (quick reference)
+
+Each feature module (`src/modules/<feature>/`) has a controller (HTTP only), an orchestrator `<Feature>Service` (business rules), and specialized services per collaborator: `<Feature>Repository` for Postgres via TypeORM, `<Feature>AuthService` / `<Feature>StorageService` for Supabase, and `<Feature><Provider>Service` for external APIs. See `src/modules/users/` for the canonical example.
+
+**Postgres vs Supabase client:** Application tables go through **TypeORM**. The Supabase HTTP client is only for Auth, Storage, and Realtime. Do not query app tables via `supabase.from(...)` from the server.
