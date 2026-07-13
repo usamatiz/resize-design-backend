@@ -8,48 +8,46 @@ import { randomUUID } from 'crypto';
 import { extname } from 'path';
 import { SupabaseService } from '../../../supabase/supabase.service';
 
-export interface UploadedLogo {
+export interface UploadedProjectPreview {
   path: string;
   publicUrl: string;
 }
 
-const BUCKET = 'brand-logos';
-const ALLOWED_MIME = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/svg+xml',
-]);
-const MAX_BYTES = 5 * 1024 * 1024;
+const BUCKET = 'project-previews';
+const ALLOWED_MIME = new Set(['image/png', 'image/jpeg']);
+const MAX_BYTES = 15 * 1024 * 1024;
 
 @Injectable()
-export class BrandsStorageService {
-  private readonly logger = new Logger(BrandsStorageService.name);
+export class ProjectsStorageService {
+  private readonly logger = new Logger(ProjectsStorageService.name);
 
   constructor(private readonly supabase: SupabaseService) {}
 
-  async uploadLogo(file: {
-    buffer: Buffer;
-    mimetype: string;
-    originalname: string;
-    size: number;
-  }): Promise<UploadedLogo> {
+  async uploadPreview(
+    projectId: string,
+    file: {
+      buffer: Buffer;
+      mimetype: string;
+      originalname: string;
+      size: number;
+    },
+  ): Promise<UploadedProjectPreview> {
     if (!file?.buffer) {
-      throw new BadRequestException('Logo file is required');
+      throw new BadRequestException('Preview image is required');
     }
     if (!ALLOWED_MIME.has(file.mimetype)) {
       throw new UnsupportedMediaTypeException(
-        `Unsupported logo type: ${file.mimetype}`,
+        `Unsupported image type: ${file.mimetype}`,
       );
     }
     if (file.size > MAX_BYTES) {
       throw new BadRequestException(
-        `Logo exceeds max size of ${MAX_BYTES} bytes`,
+        `Preview image exceeds max size of ${MAX_BYTES} bytes`,
       );
     }
 
     const ext = extname(file.originalname).toLowerCase() || '.png';
-    const path = `${randomUUID()}${ext}`;
+    const path = `${projectId}/${randomUUID()}${ext}`;
 
     const { error } = await this.supabase.admin.storage
       .from(BUCKET)
@@ -70,17 +68,10 @@ export class BrandsStorageService {
     return { path, publicUrl: data.publicUrl };
   }
 
-  async deleteLogo(path: string): Promise<void> {
+  async deletePreview(path: string): Promise<void> {
     const { error } = await this.supabase.admin.storage
       .from(BUCKET)
       .remove([path]);
     if (error) throw new Error(error.message);
-  }
-
-  extractPathFromPublicUrl(publicUrl: string): string | null {
-    const marker = `/${BUCKET}/`;
-    const idx = publicUrl.indexOf(marker);
-    if (idx === -1) return null;
-    return publicUrl.slice(idx + marker.length);
   }
 }

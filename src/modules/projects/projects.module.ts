@@ -10,6 +10,7 @@ import { DesignsService } from './services/designs.service';
 import { DesignsStorageService } from './services/designs-storage.service';
 import { ProjectsRepository } from './services/projects.repository';
 import { ProjectsService } from './services/projects.service';
+import { ProjectsStorageService } from './services/projects-storage.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Project, Design])],
@@ -17,6 +18,7 @@ import { ProjectsService } from './services/projects.service';
   providers: [
     ProjectsService,
     ProjectsRepository,
+    ProjectsStorageService,
     DesignsService,
     DesignsRepository,
     DesignsStorageService,

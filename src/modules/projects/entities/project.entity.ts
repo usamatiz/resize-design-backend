@@ -34,6 +34,15 @@ export class Project {
   @Column({ name: 'source_image_url', type: 'text', nullable: true })
   sourceImageUrl: string | null;
 
+  @Column({ name: 'source_image_path', type: 'text', nullable: true })
+  sourceImagePath: string | null;
+
+  @Column({ type: 'int' })
+  width: number;
+
+  @Column({ type: 'int' })
+  height: number;
+
   @OneToMany(() => Design, (design) => design.project)
   designs?: Design[];
 

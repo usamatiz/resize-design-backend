@@ -26,6 +26,10 @@ export class BrandsRepository {
     return this.repo.save(this.repo.create(data));
   }
 
+  update(brand: Brand, patch: DeepPartial<Brand>): Promise<Brand> {
+    return this.repo.save(this.repo.merge(brand, patch));
+  }
+
   async delete(id: string): Promise<boolean> {
     const res = await this.repo.delete({ id });
     return (res.affected ?? 0) > 0;

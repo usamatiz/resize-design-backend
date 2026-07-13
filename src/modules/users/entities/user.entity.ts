@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserRole } from './user-role.enum';
+import { UserStatus } from './user-status.enum';
 
 @Entity({ name: 'users' })
 export class User {
@@ -27,6 +28,14 @@ export class User {
     default: UserRole.VIEWER,
   })
   role: UserRole;
+
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    enumName: 'user_status',
+    default: UserStatus.INVITED,
+  })
+  status: UserStatus;
 
   /** Supabase auth user id (from auth.users.id). Set when the auth user is created. */
   @Index({ unique: true, where: 'supabase_auth_id IS NOT NULL' })

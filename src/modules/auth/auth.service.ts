@@ -106,6 +106,8 @@ export class AuthService {
       );
     }
 
+    await this.users.markActiveBySupabaseAuthId(authId);
+
     return { message: 'Password set successfully' };
   }
 }

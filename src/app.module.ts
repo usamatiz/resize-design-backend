@@ -11,6 +11,7 @@ import { DatabaseModule } from './database/database.module';
 import { MailModule } from './mail/mail.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BrandsModule } from './modules/brands/brands.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { UsersModule } from './modules/users/users.module';
 import { SupabaseModule } from './supabase/supabase.module';
@@ -30,6 +31,7 @@ import { SupabaseModule } from './supabase/supabase.module';
     AuthModule,
     BrandsModule,
     ProjectsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

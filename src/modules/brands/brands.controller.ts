@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -19,6 +20,7 @@ import {
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user-role.enum';
 import { CreateBrandDto } from './dto/create-brand.dto';
+import { UpdateBrandDto } from './dto/update-brand.dto';
 import { Brand } from './entities/brand.entity';
 import { BrandsService } from './services/brands.service';
 
@@ -39,7 +41,18 @@ export class BrandsController {
   @Roles(UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: CreateBrandDto })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name', 'location', 'category', 'logo'],
+      properties: {
+        name: { type: 'string', example: 'Acme Coffee' },
+        location: { type: 'string', example: 'Karachi, Pakistan' },
+        category: { type: 'string', example: 'Food & Beverage' },
+        logo: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @ApiOperation({ summary: 'Create a brand with a logo (admin only)' })
   create(
     @Body() dto: CreateBrandDto,
@@ -60,5 +73,29 @@ export class BrandsController {
   @ApiOperation({ summary: 'Get a brand by id' })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Brand> {
     return this.brands.findOne(id);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.ADMIN)
+  @UseInterceptors(FileInterceptor('logo'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Acme Coffee' },
+        location: { type: 'string', example: 'Karachi, Pakistan' },
+        category: { type: 'string', example: 'Food & Beverage' },
+        logo: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiOperation({ summary: 'Update a brand (admin only)' })
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateBrandDto,
+    @UploadedFile() logo?: UploadedFileLike,
+  ): Promise<Brand> {
+    return this.brands.update(id, dto, logo);
   }
 }

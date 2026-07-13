@@ -3,7 +3,6 @@ import { UserRole } from '../../modules/users/entities/user-role.enum';
 export interface InvitationEmailInput {
   fullName: string;
   role: UserRole;
-  siteUrl: string;
   confirmationUrl: string;
 }
 
@@ -23,8 +22,7 @@ export function buildInvitationEmail(
   input: InvitationEmailInput,
 ): InvitationEmail {
   const roleLabel = ROLE_LABELS[input.role];
-  const siteUrl = escapeHtmlAttr(input.siteUrl);
-  const siteUrlText = escapeHtml(input.siteUrl);
+  const roleLabelHtml = escapeHtml(roleLabel);
   const confirmationUrl = escapeHtmlAttr(input.confirmationUrl);
   const confirmationUrlText = escapeHtml(input.confirmationUrl);
   const fullName = escapeHtml(input.fullName);
@@ -159,12 +157,8 @@ export function buildInvitationEmail(
                     color: #374151;
                   "
                 >
-                  You’ve been invited to create a user account on
-                  <a
-                    href="${siteUrl}"
-                    style="color: #2563eb; text-decoration: none;"
-                    >${siteUrlText}</a
-                  >.
+                  You’ve been invited to create a user account as an
+                  <strong style="color: #111827;">${roleLabelHtml}</strong>.
                 </p>
 
                 <p

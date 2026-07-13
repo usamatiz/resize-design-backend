@@ -53,12 +53,10 @@ export class MailService implements OnModuleInit {
     fullName: string;
     role: UserRole;
     inviteLink: string;
-    siteUrl: string;
   }): Promise<{ id: string }> {
     const { subject, html, text } = buildInvitationEmail({
       fullName: input.fullName,
       role: input.role,
-      siteUrl: input.siteUrl,
       confirmationUrl: input.inviteLink,
     });
     return this.send({ to: input.to, subject, html, text });

@@ -61,7 +61,6 @@ export class UsersAuthService {
         fullName,
         role,
         inviteLink: acceptUrl,
-        siteUrl: appUrl,
       });
     } catch (err) {
       // Roll back the auth user so a retry doesn't fail with "already registered".

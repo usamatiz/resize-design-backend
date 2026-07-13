@@ -6,11 +6,13 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -18,6 +20,7 @@ import { InviteUserDto } from './dto/invite-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from './entities/user-role.enum';
+import { UserStatus } from './entities/user-status.enum';
 import { User } from './entities/user.entity';
 import { UsersService } from './services/users.service';
 
@@ -55,9 +58,16 @@ export class UsersController {
 
   @Get()
   @Roles(UserRole.ADMIN, UserRole.EDITOR)
-  @ApiOperation({ summary: 'List users (admin, editor)' })
-  findAll(): Promise<User[]> {
-    return this.users.findAll();
+  @ApiOperation({
+    summary:
+      'List users (admin, editor). Filter with ?status=invited or ?status=active.',
+  })
+  @ApiQuery({ name: 'status', required: false, enum: UserStatus })
+  findAll(
+    @Query('status', new ParseEnumPipe(UserStatus, { optional: true }))
+    status?: UserStatus,
+  ): Promise<User[]> {
+    return this.users.findAll(status);
   }
 
   @Get(':id')

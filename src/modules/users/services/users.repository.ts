@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 import { UserRole } from '../entities/user-role.enum';
+import { UserStatus } from '../entities/user-status.enum';
 import { User } from '../entities/user.entity';
 
 @Injectable()
@@ -23,8 +24,11 @@ export class UsersRepository {
     return this.repo.findOne({ where: { supabaseAuthId: authId } });
   }
 
-  findAll(): Promise<User[]> {
-    return this.repo.find({ order: { createdAt: 'DESC' } });
+  findAll(status?: UserStatus): Promise<User[]> {
+    return this.repo.find({
+      where: status ? { status } : undefined,
+      order: { createdAt: 'DESC' },
+    });
   }
 
   countByRole(role: UserRole): Promise<number> {

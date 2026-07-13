@@ -8,9 +8,14 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -21,6 +26,13 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './entities/project.entity';
 import { ProjectsService } from './services/projects.service';
 
+interface UploadedFileLike {
+  buffer: Buffer;
+  mimetype: string;
+  originalname: string;
+  size: number;
+}
+
 @ApiTags('projects')
 @ApiBearerAuth('access-token')
 @Controller()
@@ -29,12 +41,31 @@ export class ProjectsController {
 
   @Post('brands/:brandId/projects')
   @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name', 'sourceJson', 'width', 'height', 'image'],
+      properties: {
+        name: { type: 'string', example: 'Summer campaign v1' },
+        sourceJson: {
+          type: 'string',
+          description: 'Polotno store JSON, sent as a JSON string',
+        },
+        width: { type: 'integer', example: 1080 },
+        height: { type: 'integer', example: 1080 },
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @ApiOperation({ summary: 'Create a project under a brand' })
   create(
     @Param('brandId', ParseUUIDPipe) brandId: string,
     @Body() dto: CreateProjectDto,
+    @UploadedFile() image: UploadedFileLike | undefined,
   ): Promise<Project> {
-    return this.projects.create(brandId, dto);
+    return this.projects.create(brandId, dto, image);
   }
 
   @Get('brands/:brandId/projects')

@@ -1,5 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsObject, IsOptional, IsString, IsUrl, MinLength } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsInt, IsObject, IsString, Min, MinLength } from 'class-validator';
+
+function parseJsonField(value: unknown): unknown {
+  if (typeof value !== 'string') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
 
 export class CreateProjectDto {
   @ApiProperty({ example: 'Summer campaign v1' })
@@ -11,14 +21,19 @@ export class CreateProjectDto {
     description: 'Polotno store JSON exported from the editor',
     type: Object,
   })
+  @Transform(({ value }) => parseJsonField(value))
   @IsObject()
   sourceJson: Record<string, unknown>;
 
-  @ApiProperty({
-    required: false,
-    description: 'Optional public URL of a preview render of the source design',
-  })
-  @IsOptional()
-  @IsUrl()
-  sourceImageUrl?: string;
+  @ApiProperty({ example: 1080, description: 'Canvas width in pixels' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  width: number;
+
+  @ApiProperty({ example: 1080, description: 'Canvas height in pixels' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  height: number;
 }

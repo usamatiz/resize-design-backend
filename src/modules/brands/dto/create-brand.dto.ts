@@ -16,7 +16,4 @@ export class CreateBrandDto {
   @IsString()
   @MinLength(1)
   category: string;
-
-  @ApiProperty({ type: 'string', format: 'binary', description: 'Logo image' })
-  logo?: unknown;
 }

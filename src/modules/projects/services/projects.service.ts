@@ -5,6 +5,14 @@ import { Project } from '../entities/project.entity';
 import { DesignsRepository } from './designs.repository';
 import { DesignsStorageService } from './designs-storage.service';
 import { ProjectsRepository } from './projects.repository';
+import { ProjectsStorageService } from './projects-storage.service';
+
+interface PreviewFile {
+  buffer: Buffer;
+  mimetype: string;
+  originalname: string;
+  size: number;
+}
 
 @Injectable()
 export class ProjectsService {
@@ -12,15 +20,42 @@ export class ProjectsService {
     private readonly projects: ProjectsRepository,
     private readonly designs: DesignsRepository,
     private readonly designsStorage: DesignsStorageService,
+    private readonly projectsStorage: ProjectsStorageService,
   ) {}
 
-  create(brandId: string, dto: CreateProjectDto): Promise<Project> {
-    return this.projects.create({
+  async create(
+    brandId: string,
+    dto: CreateProjectDto,
+    preview?: PreviewFile,
+  ): Promise<Project> {
+    const project = await this.projects.create({
       brandId,
       name: dto.name,
       sourceJson: dto.sourceJson,
-      sourceImageUrl: dto.sourceImageUrl ?? null,
+      sourceImageUrl: null,
+      sourceImagePath: null,
+      width: dto.width,
+      height: dto.height,
     });
+
+    if (!preview?.buffer) {
+      return project;
+    }
+
+    try {
+      const uploaded = await this.projectsStorage.uploadPreview(
+        project.id,
+        preview,
+      );
+      const updated = await this.projects.update(project.id, {
+        sourceImageUrl: uploaded.publicUrl,
+        sourceImagePath: uploaded.path,
+      });
+      return updated ?? project;
+    } catch (err) {
+      await this.projects.delete(project.id).catch(() => undefined);
+      throw err;
+    }
   }
 
   findByBrand(brandId: string): Promise<Project[]> {
@@ -52,6 +87,12 @@ export class ProjectsService {
           .deleteImage(design.imageStoragePath)
           .catch(() => undefined);
       }
+    }
+
+    if (existing.sourceImagePath) {
+      await this.projectsStorage
+        .deletePreview(existing.sourceImagePath)
+        .catch(() => undefined);
     }
 
     await this.projects.delete(id);

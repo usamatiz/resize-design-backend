@@ -10,6 +10,7 @@ import { InviteUserDto } from '../dto/invite-user.dto';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserRole } from '../entities/user-role.enum';
+import { UserStatus } from '../entities/user-status.enum';
 import { User } from '../entities/user.entity';
 import { UsersAuthService } from './users-auth.service';
 import { UsersRepository } from './users.repository';
@@ -45,6 +46,7 @@ export class UsersService {
         fullName: dto.fullName,
         role: dto.role,
         supabaseAuthId: authId,
+        status: UserStatus.INVITED,
       });
     } catch (err) {
       await this.usersAuth.deleteAuthUser(authId).catch(() => undefined);
@@ -80,6 +82,7 @@ export class UsersService {
         fullName,
         role: UserRole.ADMIN,
         supabaseAuthId: authId,
+        status: UserStatus.ACTIVE,
       });
     } catch (err) {
       await this.usersAuth.deleteAuthUser(authId).catch(() => undefined);
@@ -87,8 +90,19 @@ export class UsersService {
     }
   }
 
-  findAll(): Promise<User[]> {
-    return this.usersRepo.findAll();
+  findAll(status?: UserStatus): Promise<User[]> {
+    return this.usersRepo.findAll(status);
+  }
+
+  /**
+   * Flip an invited user to active once they've set their password. Called
+   * from the invite/set-password flow. Idempotent — already-active users pass
+   * through unchanged.
+   */
+  async markActiveBySupabaseAuthId(authId: string): Promise<void> {
+    const user = await this.usersRepo.findBySupabaseAuthId(authId);
+    if (!user || user.status === UserStatus.ACTIVE) return;
+    await this.usersRepo.update(user.id, { status: UserStatus.ACTIVE });
   }
 
   async findOne(id: string): Promise<User> {
@@ -102,9 +116,20 @@ export class UsersService {
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
     const updated = await this.usersRepo.update(id, dto);
     if (!updated) throw new NotFoundException(`User ${id} not found`);
+
+    if (
+      dto.fullName !== undefined &&
+      dto.fullName !== existing.fullName &&
+      existing.supabaseAuthId
+    ) {
+      await this.usersAuth
+        .updateFullName(existing.supabaseAuthId, dto.fullName)
+        .catch(() => undefined);
+    }
+
     return updated;
   }
 
