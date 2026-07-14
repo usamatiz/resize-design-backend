@@ -42,12 +42,8 @@ export class DashboardRepository {
     return this.designs.count();
   }
 
-  async countActiveProjects(): Promise<number> {
-    const { count } = await this.designs
-      .createQueryBuilder('d')
-      .select('COUNT(DISTINCT d.project_id)', 'count')
-      .getRawOne<{ count: string }>() ?? { count: '0' };
-    return Number(count);
+  countProjects(): Promise<number> {
+    return this.projects.count();
   }
 
   countBrandsSince(since: Date): Promise<number> {

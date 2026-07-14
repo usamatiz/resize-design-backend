@@ -28,20 +28,11 @@ export class Project {
   @Column({ type: 'text' })
   name: string;
 
-  @Column({ name: 'source_json', type: 'jsonb' })
-  sourceJson: Record<string, unknown>;
-
   @Column({ name: 'source_image_url', type: 'text', nullable: true })
   sourceImageUrl: string | null;
 
   @Column({ name: 'source_image_path', type: 'text', nullable: true })
   sourceImagePath: string | null;
-
-  @Column({ type: 'int' })
-  width: number;
-
-  @Column({ type: 'int' })
-  height: number;
 
   @OneToMany(() => Design, (design) => design.project)
   designs?: Design[];

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
+import { Design } from '../entities/design.entity';
 import { Project } from '../entities/project.entity';
 
 @Injectable()
@@ -41,5 +42,20 @@ export class ProjectsRepository {
   async delete(id: string): Promise<boolean> {
     const res = await this.repo.delete({ id });
     return (res.affected ?? 0) > 0;
+  }
+
+  async countDesignsByProjectIds(
+    projectIds: string[],
+  ): Promise<Map<string, number>> {
+    if (projectIds.length === 0) return new Map();
+    const rows = await this.repo.manager
+      .getRepository(Design)
+      .createQueryBuilder('d')
+      .select('d.projectId', 'projectId')
+      .addSelect('COUNT(*)::int', 'count')
+      .where('d.projectId IN (:...ids)', { ids: projectIds })
+      .groupBy('d.projectId')
+      .getRawMany<{ projectId: string; count: number }>();
+    return new Map(rows.map((r) => [r.projectId, Number(r.count)]));
   }
 }

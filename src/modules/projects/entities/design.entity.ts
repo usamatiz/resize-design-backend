@@ -11,6 +11,7 @@ import {
 import { Project } from './project.entity';
 
 @Entity({ name: 'designs' })
+@Index('IDX_designs_project_is_source', ['projectId', 'isSource'])
 export class Design {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -31,9 +32,6 @@ export class Design {
   @Column({ type: 'int' })
   height: number;
 
-  @Column({ type: 'text' })
-  prompt: string;
-
   @Column({ name: 'resized_json', type: 'jsonb' })
   resizedJson: Record<string, unknown>;
 
@@ -43,8 +41,8 @@ export class Design {
   @Column({ name: 'image_storage_path', type: 'text', nullable: true })
   imageStoragePath: string | null;
 
-  @Column({ name: 'claude_model', type: 'text', nullable: true })
-  claudeModel: string | null;
+  @Column({ name: 'is_source', type: 'boolean', default: false })
+  isSource: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

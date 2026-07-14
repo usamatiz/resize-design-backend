@@ -21,6 +21,27 @@ export class DesignsRepository {
     });
   }
 
+  findSourceByProject(projectId: string): Promise<Design | null> {
+    return this.repo.findOne({ where: { projectId, isSource: true } });
+  }
+
+  findSourcesByProjectIds(projectIds: string[]): Promise<Design[]> {
+    if (projectIds.length === 0) return Promise.resolve([]);
+    return this.repo
+      .createQueryBuilder('d')
+      .where('d.projectId IN (:...ids)', { ids: projectIds })
+      .andWhere('d.isSource = true')
+      .getMany();
+  }
+
+  findOneByProjectAndSize(
+    projectId: string,
+    width: number,
+    height: number,
+  ): Promise<Design | null> {
+    return this.repo.findOne({ where: { projectId, width, height } });
+  }
+
   create(data: DeepPartial<Design>): Promise<Design> {
     return this.repo.save(this.repo.create(data));
   }

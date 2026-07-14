@@ -23,8 +23,11 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user-role.enum';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { Project } from './entities/project.entity';
-import { ProjectsService } from './services/projects.service';
+import {
+  ProjectDetail,
+  ProjectsService,
+  ProjectSummary,
+} from './services/projects.service';
 
 interface UploadedFileLike {
   buffer: Buffer;
@@ -64,7 +67,7 @@ export class ProjectsController {
     @Param('brandId', ParseUUIDPipe) brandId: string,
     @Body() dto: CreateProjectDto,
     @UploadedFile() image: UploadedFileLike | undefined,
-  ): Promise<Project> {
+  ): Promise<ProjectDetail> {
     return this.projects.create(brandId, dto, image);
   }
 
@@ -73,25 +76,40 @@ export class ProjectsController {
   @ApiOperation({ summary: 'List projects in a brand' })
   findByBrand(
     @Param('brandId', ParseUUIDPipe) brandId: string,
-  ): Promise<Project[]> {
+  ): Promise<ProjectSummary[]> {
     return this.projects.findByBrand(brandId);
   }
 
   @Get('projects/:id')
   @Roles(UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER)
   @ApiOperation({ summary: 'Get a project with its designs' })
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Project> {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ProjectDetail> {
     return this.projects.findOne(id);
   }
 
   @Patch('projects/:id')
   @Roles(UserRole.ADMIN, UserRole.EDITOR)
-  @ApiOperation({ summary: 'Update a project' })
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Summer campaign v2' },
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiOperation({
+    summary:
+      'Update a project (name and/or cover image). Canvas edits go to the source design endpoint.',
+  })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProjectDto,
-  ): Promise<Project> {
-    return this.projects.update(id, dto);
+    @UploadedFile() image: UploadedFileLike | undefined,
+  ): Promise<ProjectDetail> {
+    return this.projects.update(id, dto, image);
   }
 
   @Delete('projects/:id')

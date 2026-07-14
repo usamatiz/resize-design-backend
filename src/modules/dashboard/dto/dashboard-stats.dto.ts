@@ -8,13 +8,13 @@ export class DashboardTotalsDto {
   @ApiProperty({ example: 8 })
   totalTeamMembers: number;
 
-  @ApiProperty({
-    example: 5,
-    description: 'Projects that have at least one design',
-  })
-  activeProjects: number;
+  @ApiProperty({ example: 5, description: 'Total Project rows across all brands' })
+  totalProjects: number;
 
-  @ApiProperty({ example: 42 })
+  @ApiProperty({
+    example: 42,
+    description: 'Total Design (resized variant) rows across all projects',
+  })
   totalDesigns: number;
 }
 

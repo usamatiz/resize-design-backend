@@ -13,7 +13,7 @@ export interface UploadedDesignImage {
   publicUrl: string;
 }
 
-const BUCKET = 'design-images';
+const BUCKET = 'project-previews';
 const ALLOWED_MIME = new Set(['image/png', 'image/jpeg']);
 const MAX_BYTES = 15 * 1024 * 1024;
 

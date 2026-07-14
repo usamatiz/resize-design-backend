@@ -16,7 +16,7 @@ export class DashboardService {
     const [
       totalBrands,
       totalTeamMembers,
-      activeProjects,
+      totalProjects,
       totalDesigns,
       usersAdded,
       brandsAdded,
@@ -27,7 +27,7 @@ export class DashboardService {
     ] = await Promise.all([
       this.repo.countBrands(),
       this.repo.countUsers(),
-      this.repo.countActiveProjects(),
+      this.repo.countProjects(),
       this.repo.countDesigns(),
       this.repo.countUsersSince(startOfToday),
       this.repo.countBrandsSince(startOfToday),
@@ -41,7 +41,7 @@ export class DashboardService {
       totals: {
         totalBrands,
         totalTeamMembers,
-        activeProjects,
+        totalProjects,
         totalDesigns,
       },
       todayActivity: {

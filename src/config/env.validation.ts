@@ -33,6 +33,8 @@ class EnvVars {
 
   @IsString() ANTHROPIC_API_KEY: string;
   @IsString() @IsOptional() ANTHROPIC_MODEL?: string;
+
+  @IsString() POLOTNO_API_KEY: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
