@@ -10,6 +10,8 @@ import supabaseConfig from './config/supabase.config';
 import { DatabaseModule } from './database/database.module';
 import { MailModule } from './mail/mail.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BrandAssetsModule } from './modules/brand-assets/brand-assets.module';
+import { BrandFontsModule } from './modules/brand-fonts/brand-fonts.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ProjectsModule } from './modules/projects/projects.module';
@@ -30,6 +32,8 @@ import { SupabaseModule } from './supabase/supabase.module';
     UsersModule,
     AuthModule,
     BrandsModule,
+    BrandAssetsModule,
+    BrandFontsModule,
     ProjectsModule,
     DashboardModule,
   ],
